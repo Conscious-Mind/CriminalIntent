@@ -1,23 +1,29 @@
 package com.davidson.criminalintent
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import com.davidson.criminalintent.databinding.FragmentCrimeDetailBinding
 import java.util.*
 
+private const val TAG = "CrimeDetailFragments"
+
 class CrimeDetailFragment : Fragment() {
 
-    private  var _binding: FragmentCrimeDetailBinding? = null
+    private var _binding: FragmentCrimeDetailBinding? = null
     private val binding
-        get() = checkNotNull(_binding){
+        get() = checkNotNull(_binding) {
             "Cannot Access the binding because it is null. Is the view visible?"
         }
 
     private lateinit var crime: Crime
+
+    private val args: CrimeDetailFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +34,8 @@ class CrimeDetailFragment : Fragment() {
             date = Date(),
             isSolved = false,
         )
+
+        Log.d(TAG, "The Crime id is: ${args.crimeId}")
     }
 
     override fun onCreateView(

@@ -1,6 +1,7 @@
 package com.davidson.criminalintent
 
 import android.os.Bundle
+import android.text.Layout.Directions
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.davidson.criminalintent.databinding.FragmentCrimeListBinding
 import kotlinx.coroutines.launch
@@ -44,7 +46,9 @@ class CrimeListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 crimeListViewModel.crimes.collect { crimes ->
-                    binding.rvCrime.adapter = CrimeListAdapter(crimes)
+                    binding.rvCrime.adapter = CrimeListAdapter(crimes){crimeId ->
+                        findNavController().navigate(CrimeListFragmentDirections.actionCrimeListFragmentToCrimeDetailFragment(crimeId))
+                    }
                 }
             }
         }

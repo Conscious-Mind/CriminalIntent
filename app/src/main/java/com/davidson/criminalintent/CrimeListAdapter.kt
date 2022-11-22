@@ -3,25 +3,24 @@ package com.davidson.criminalintent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.davidson.criminalintent.databinding.ListItemCrimeBinding
 import java.text.SimpleDateFormat
+import java.util.*
 
 val simpleDateFormat = SimpleDateFormat("EEEE, LLL dd, yyyy - HH:mm:ss aaa z")
 
 
 class CrimeHolder(private val binding: ListItemCrimeBinding) :
     RecyclerView.ViewHolder(binding.root) {
-    fun bind(crime: Crime) {
+    fun bind(crime: Crime, onCrimeClicked: (crimeId: UUID) -> Unit) {
         binding.tvCrimeTitle.text = crime.title
         val dateFormatted = simpleDateFormat.format(crime.date)
         binding.tvCrimeDate.text = dateFormatted
 
 
         binding.root.setOnClickListener {
-            Toast.makeText(binding.root.context, "${crime.title} clicked!", Toast.LENGTH_SHORT)
-                .show()
+            onCrimeClicked(crime.id)
         }
         binding.ivCrimeSolved.visibility = if (crime.isSolved) View.VISIBLE else View.INVISIBLE
     }
@@ -29,9 +28,11 @@ class CrimeHolder(private val binding: ListItemCrimeBinding) :
 }
 
 
-
-
-class CrimeListAdapter(private val crimes: List<Crime>) : RecyclerView.Adapter<CrimeHolder>() {
+class CrimeListAdapter(
+    private val crimes: List<Crime>,
+    private val onCrimeClicked: (crimeId: UUID) -> Unit
+) :
+    RecyclerView.Adapter<CrimeHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ListItemCrimeBinding.inflate(inflater, parent, false)
@@ -40,7 +41,7 @@ class CrimeListAdapter(private val crimes: List<Crime>) : RecyclerView.Adapter<C
 
     override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
         val crime = crimes[position]
-        holder.bind(crime)
+        holder.bind(crime, onCrimeClicked)
     }
 
     override fun getItemCount(): Int {
