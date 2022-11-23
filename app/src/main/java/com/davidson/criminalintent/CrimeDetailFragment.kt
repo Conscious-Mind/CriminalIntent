@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -15,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.davidson.criminalintent.databinding.FragmentCrimeDetailBinding
 import kotlinx.coroutines.launch
+import java.util.*
 
 private const val TAG = "CrimeDetailFragments"
 
@@ -41,6 +43,7 @@ class CrimeDetailFragment : Fragment() {
             }
         }
         callback.isEnabled = true
+
     }
 
 
@@ -63,9 +66,7 @@ class CrimeDetailFragment : Fragment() {
                 }
             }
 
-            btnCrimeDate.apply {
-                isEnabled = false
-            }
+
 
             cbCrimeSolved.setOnCheckedChangeListener { _, isChecked ->
                 crimeDetailViewModel.updateCrime { oldCrime ->
@@ -81,6 +82,11 @@ class CrimeDetailFragment : Fragment() {
                 }
             }
         }
+
+        setFragmentResultListener(DatePickerFragment.REQUEST_KEY_DATE) { _, bundle ->
+            val newDate = bundle.getSerializable(DatePickerFragment.BUNDLE_KEY_DATE) as Date
+            crimeDetailViewModel.updateCrime { it.copy(date = newDate) }
+        }
     }
 
     override fun onDestroyView() {
@@ -95,6 +101,13 @@ class CrimeDetailFragment : Fragment() {
             }
             btnCrimeDate.text = crime.date.toString()
             cbCrimeSolved.isChecked = crime.isSolved
+            btnCrimeDate.setOnClickListener {
+                findNavController().navigate(
+                    CrimeDetailFragmentDirections.actionCrimeDetailFragmentToDatePickerFragment(
+                        crime.date
+                    )
+                )
+            }
         }
     }
 }

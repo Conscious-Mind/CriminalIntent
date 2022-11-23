@@ -1,7 +1,6 @@
 package com.davidson.criminalintent
 
 import android.os.Bundle
-import android.text.Layout.Directions
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,8 +45,12 @@ class CrimeListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 crimeListViewModel.crimes.collect { crimes ->
-                    binding.rvCrime.adapter = CrimeListAdapter(crimes){crimeId ->
-                        findNavController().navigate(CrimeListFragmentDirections.actionCrimeListFragmentToCrimeDetailFragment(crimeId))
+                    binding.rvCrime.adapter = CrimeListAdapter(crimes) { crimeId ->
+                        findNavController().navigate(
+                            CrimeListFragmentDirections.actionCrimeListFragmentToCrimeDetailFragment(
+                                crimeId
+                            )
+                        )
                     }
                 }
             }
