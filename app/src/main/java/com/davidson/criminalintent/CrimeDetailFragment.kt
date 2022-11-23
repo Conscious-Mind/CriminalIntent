@@ -1,15 +1,20 @@
 package com.davidson.criminalintent
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.davidson.criminalintent.databinding.FragmentCrimeDetailBinding
-import java.util.*
+import kotlinx.coroutines.launch
 
 private const val TAG = "CrimeDetailFragments"
 
@@ -21,22 +26,23 @@ class CrimeDetailFragment : Fragment() {
             "Cannot Access the binding because it is null. Is the view visible?"
         }
 
-    private lateinit var crime: Crime
 
     private val args: CrimeDetailFragmentArgs by navArgs()
 
+    private val crimeDetailViewModel: CrimeDetailViewModel by viewModels {
+        CrimeDetailViewModelFactory(args.crimeId)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        crime = Crime(
-            id = UUID.randomUUID(),
-            title = "",
-            date = Date(),
-            isSolved = false,
-        )
-
-        Log.d(TAG, "The Crime id is: ${args.crimeId}")
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            if (binding.etvCrimeTitle.text.toString() != "") {
+                findNavController().popBackStack()
+            }
+        }
+        callback.isEnabled = true
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,16 +58,27 @@ class CrimeDetailFragment : Fragment() {
 
         binding.apply {
             etvCrimeTitle.doOnTextChanged { text, _, _, _ ->
-                crime = crime.copy(title = text.toString())
+                crimeDetailViewModel.updateCrime { oldCrime ->
+                    oldCrime.copy(title = text.toString())
+                }
             }
 
             btnCrimeDate.apply {
-                text = crime.date.toString()
                 isEnabled = false
             }
 
             cbCrimeSolved.setOnCheckedChangeListener { _, isChecked ->
-                crime = crime.copy(isSolved = isChecked)
+                crimeDetailViewModel.updateCrime { oldCrime ->
+                    oldCrime.copy(isSolved = isChecked)
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                crimeDetailViewModel.crime.collect { crime ->
+                    crime?.let { updateUi(it) }
+                }
             }
         }
     }
@@ -69,5 +86,15 @@ class CrimeDetailFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun updateUi(crime: Crime) {
+        binding.apply {
+            if (etvCrimeTitle.text.toString() != crime.title) {
+                etvCrimeTitle.setText(crime.title)
+            }
+            btnCrimeDate.text = crime.date.toString()
+            cbCrimeSolved.isChecked = crime.isSolved
+        }
     }
 }
