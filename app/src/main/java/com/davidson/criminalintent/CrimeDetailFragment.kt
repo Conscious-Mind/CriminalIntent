@@ -129,7 +129,7 @@ class CrimeDetailFragment : Fragment() {
 
             val captureImageIntent = takePhoto.contract.createIntent(
                 requireContext(),
-                null
+                Uri.parse("")
             )
             btnCrimeCamera.isEnabled = canResolveIntent(captureImageIntent)
         }
@@ -186,6 +186,7 @@ class CrimeDetailFragment : Fragment() {
                 getString(R.string.crime_suspect)
             }
             updatePhoto(crime.photoFileName)
+            ivCrimePhoto.rotation = 90F
         }
     }
 
